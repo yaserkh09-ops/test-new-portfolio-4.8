@@ -113,7 +113,10 @@ const rows = t.rows.map((row) => {
     overflow: hidden;
   }
   .terminal__prompt {
-    color: var(--accent);
+    /* On glass, text is always full ink/paper; green is reserved for the
+       non-text pass-dots (green means "test passed", used sparingly). */
+    color: var(--text);
+    opacity: 0.7;
   }
   .terminal__rows {
     display: grid;
@@ -150,8 +153,10 @@ const rows = t.rows.map((row) => {
     opacity: 1;
   }
   .terminal__note {
+    /* Text on glass must be full ink/paper (stone fails over the worst-case
+       particle backdrop — see scripts/contrast.mjs). */
     margin-block-start: 0.85rem;
-    color: var(--text-3);
+    color: var(--text);
     font-size: var(--fs-mono-sm);
     direction: ltr;
     text-align: start;
