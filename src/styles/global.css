@@ -288,6 +288,28 @@ html[lang="ar"] li {
 }
 
 /* =============================================================================
+   VIEW TRANSITIONS
+   - Locale switch is cross-document (default crossfade via @view-transition).
+   - Theme toggle is same-document: a radial circle wipe expanding from the
+     toggle button. We scope the wipe to html.theme-vt so it never disturbs the
+     cross-document navigation transition.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-vt::view-transition-old(root),
+  html.theme-vt::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  html.theme-vt::view-transition-old(root) {
+    z-index: 0;
+  }
+  html.theme-vt::view-transition-new(root) {
+    z-index: 1;
+    /* JS animates clip-path on this pseudo from a 0px circle outward. */
+  }
+}
+
+/* =============================================================================
    REDUCED MOTION — full parity. Motion JS (GSAP/Lenis/OGL islands) is gated by
    the media query in JS and simply never downloads; here we neutralise CSS-only
    motion (marquee, sweeps, reveals) so the static content is identical.

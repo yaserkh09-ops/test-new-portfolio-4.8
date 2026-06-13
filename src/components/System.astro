@@ -76,11 +76,15 @@ const s = content.system;
     display: grid;
     gap: 0.5rem;
     padding-block-start: 2.75rem;
-    /* Inactive steps dim; motion sets the active one to full + green label. */
-    opacity: 0.4;
+    /* Readable by default (no-JS safe). The motion bundle opts in to dimming
+       via [data-enhanced] and drives the active step. */
+    opacity: 1;
     transition: opacity var(--dur) var(--ease);
   }
-  .system__tick[data-active="true"] {
+  [data-enhanced="true"] .system__tick {
+    opacity: 0.4;
+  }
+  [data-enhanced="true"] .system__tick[data-active="true"] {
     opacity: 1;
   }
   .system__num {
@@ -106,11 +110,16 @@ const s = content.system;
     gap: var(--space-md);
   }
   .system__body {
+    color: var(--text);
+    opacity: 1;
+    transition: opacity var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  [data-enhanced="true"] .system__body {
     color: var(--text-2);
     opacity: 0.5;
-    transition: opacity var(--dur) var(--ease);
   }
-  .system__body[data-active="true"] {
+  [data-enhanced="true"] .system__body[data-active="true"] {
     opacity: 1;
     color: var(--text);
   }

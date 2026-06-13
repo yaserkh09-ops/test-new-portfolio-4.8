@@ -119,6 +119,11 @@ const preloadFonts =
     </main>
 
     <Footer locale={locale} />
+
+    {/* Always-on entry. Gates GSAP/Lenis + OGL behind capability checks. */}
+    <script>
+      import "../scripts/main.ts";
+    </script>
   </body>
 </html>
 
@@ -182,7 +187,29 @@ const preloadFonts =
     transition: width var(--dur-fast) var(--ease),
       height var(--dur-fast) var(--ease),
       border-radius var(--dur-fast) var(--ease),
-      border-color var(--dur-fast) var(--ease);
+      border-color var(--dur-fast) var(--ease),
+      background-color var(--dur-fast) var(--ease);
+  }
+  /* Over an interactive element: the ring FLATTENS into a short green Stroke. */
+  .cursor__ring[data-over="true"] {
+    inline-size: 34px;
+    block-size: 3px;
+    margin-block-start: -1.5px;
+    margin-inline-start: -17px;
+    border-radius: 0;
+    border-color: transparent;
+    background-color: var(--accent);
+  }
+  .cursor .cursor__dot {
+    opacity: 1;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  /* Hide the native cursor ONLY once a fine pointer is confirmed (JS-set class).
+     Keyboard/touch users never get this class, so their cursor is untouched. */
+  html.has-custom-cursor,
+  html.has-custom-cursor :where(a, button, [data-magnetic], label, input, select, textarea) {
+    cursor: none;
   }
 
   main {
