@@ -1,0 +1,98 @@
+---
+import Wordmark from "./Wordmark.astro";
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const email = content.email;
+const c = content.cta;
+const mailto = `mailto:${email.address}?subject=${encodeURIComponent(email.subject)}`;
+---
+
+<section class="contact section" id="contact" aria-labelledby="contact-heading" data-contact>
+  <div class="shell contact__inner">
+    <p class="contact__label eyebrow">{c.label}</p>
+    <h2 id="contact-heading" class="contact__heading">{c.heading}</h2>
+    <p class="contact__line">{c.line}</p>
+
+    <div class="contact__actions">
+      <a class="btn btn--primary sweep" href={mailto} data-magnetic>{c.button}</a>
+      <span class="contact__email">
+        <span class="contact__email-label caption">{c.emailLabel}</span>
+        {/* mailto is an LTR island in both trees */}
+        <a class="contact__mailto sweep" href={mailto} dir="ltr">{email.address}</a>
+      </span>
+    </div>
+
+    <div class="contact__mark" data-contact-mark>
+      <Wordmark locale={locale} size="giant" />
+      {/* Green Stroke (the _/kashida motif) draws in on scroll entry. */}
+      <span class="contact__stroke" data-wordmark-stroke aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact__inner {
+    display: grid;
+    gap: var(--space-md);
+  }
+  .contact__label {
+    color: var(--accent);
+  }
+  .contact__heading {
+    max-inline-size: 20ch;
+  }
+  .contact__line {
+    color: var(--text-2);
+    font-size: var(--fs-lede);
+    line-height: var(--lh-lede);
+    max-inline-size: var(--measure);
+  }
+
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-block-start: var(--space-md);
+  }
+  .contact__email {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .contact__email-label {
+    color: var(--text-3);
+  }
+  .contact__mailto {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.02em;
+    direction: ltr;
+    unicode-bidi: isolate;
+    min-block-size: var(--tap);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .contact__mark {
+    position: relative;
+    margin-block-start: var(--space-2xl);
+    inline-size: max-content;
+    max-inline-size: 100%;
+  }
+  .contact__stroke {
+    display: block;
+    block-size: 4px;
+    inline-size: 100%;
+    margin-block-start: 0.1em;
+    background-color: var(--accent);
+    transform: scaleX(1); /* drawn by default (no-JS/RM); motion reveals 0 -> 1 */
+    transform-origin: inline-start;
+  }
+</style>

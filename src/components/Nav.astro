@@ -1,0 +1,140 @@
+---
+import Wordmark from "./Wordmark.astro";
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const loc = locales[locale];
+const { content } = loc;
+const other = locales[loc.other.code];
+---
+
+<header class="nav" data-nav>
+  <div class="nav__inner glass shell">
+    <a class="nav__brand" href={loc.path} aria-label={`${locale === "ar" ? "ياسر" : "YASIR_"} — home`}>
+      <Wordmark locale={locale} size="nav" />
+    </a>
+
+    <nav class="nav__links" aria-label={content.nav.contact}>
+      <a class="nav__link sweep" href="#work">{content.nav.work}</a>
+      <a class="nav__link sweep" href="#process">{content.nav.process}</a>
+      <a class="nav__link sweep" href="#contact">{content.nav.contact}</a>
+    </nav>
+
+    <div class="nav__controls">
+      <a
+        class="nav__locale sweep tap"
+        href={other.path}
+        hreflang={other.htmlLang}
+        lang={other.htmlLang}
+        dir={other.dir}
+      >
+        {content.nav.localeSwitch}
+      </a>
+
+      <button
+        class="nav__theme"
+        type="button"
+        data-theme-toggle
+        aria-label="Toggle colour theme"
+        aria-pressed="false"
+      >
+        <svg class="nav__theme-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          {/* Half-filled disc: the engineered light/dark indicator (no ornament). */}
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M12 4 a8 8 0 0 1 0 16 z" fill="currentColor" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-nav);
+    padding-block-start: clamp(0.75rem, 2vw, 1.25rem);
+    padding-inline: var(--gutter);
+    pointer-events: none; /* let the inner glass pill catch events only */
+  }
+  .nav__inner {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: 0.5rem;
+    padding-inline: clamp(0.75rem, 2vw, 1.25rem);
+    border-radius: 999px;
+    min-block-size: var(--tap);
+  }
+
+  .nav__brand {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap);
+    color: var(--wordmark);
+  }
+
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2rem);
+  }
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.9375rem;
+  }
+  html[lang="ar"] .nav__link {
+    font-size: 1rem;
+  }
+
+  .nav__controls {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.5rem, 2vw, 1rem);
+  }
+  .nav__locale {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    padding-inline: 0.5rem;
+  }
+  .nav__theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tap);
+    block-size: var(--tap);
+    color: var(--text);
+    border-radius: 999px;
+  }
+  .nav__theme:hover {
+    color: var(--accent);
+  }
+  .nav__theme-icon {
+    transition: transform var(--dur) var(--ease);
+  }
+  [data-theme="dark"] .nav__theme-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Collapse the inline links on narrow screens; controls remain reachable. */
+  @media (max-width: 40rem) {
+    .nav__links {
+      display: none;
+    }
+  }
+</style>

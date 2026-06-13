@@ -1,0 +1,269 @@
+---
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const w = content.work;
+// Arrow nudges toward the reading end; mirrored in RTL via the glyph + logical CSS.
+const arrow = locale === "ar" ? "←" : "→";
+---
+
+<section class="work section" id="work" aria-labelledby="work-heading" data-work>
+  <div class="shell">
+    <header class="work__head">
+      <h2 id="work-heading">{w.heading}</h2>
+      <p class="work__line">{w.line}</p>
+    </header>
+
+    <div class="work__grid">
+      {w.cards.map((card, i) => {
+        const idx = String(i + 1).padStart(2, "0");
+        return (
+          <article class="card" data-card style={`--i:${i}`}>
+            <div class="card__media" data-card-media>
+              <svg class="card__placeholder" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <pattern id={`card-dg-${i}`} width="10" height="10" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="1" fill="currentColor" />
+                  </pattern>
+                </defs>
+                <rect width="400" height="320" fill={`url(#card-dg-${i})`} class="card__dots" />
+                {/* Ghost index numeral */}
+                <text class="card__ghost" x="50%" y="58%" text-anchor="middle" dominant-baseline="middle">{idx}</text>
+                {/* Green Stroke motif */}
+                <rect class="card__stroke" x="32" y="268" width="96" height="3" />
+              </svg>
+              {/* Client mono chip */}
+              <span class="card__chip mono">{card.client}</span>
+              {/* Huge client title set over the image edge (ink, normal blend) */}
+              <h3 class="card__title">{card.client}</h3>
+            </div>
+
+            <div class="card__info">
+              <p class="card__meta mono">
+                <span>{card.client}</span>
+                <span class="card__dot" aria-hidden="true">·</span>
+                <span>{card.sector}</span>
+                <span class="card__dot" aria-hidden="true">·</span>
+                <span class="card__year">{card.year}</span>
+              </p>
+              <p class="card__body">{card.body}</p>
+              <span class="card__cta mono">
+                {/* Stretched link makes the whole card one 44px+ target. */}
+                <a class="card__link" href="#contact" aria-label={`${w.cardCta} — ${card.client}`}>
+                  {w.cardCta}
+                </a>
+                <span class="card__arrow" aria-hidden="true">{arrow}</span>
+              </span>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<style>
+  .work__head {
+    display: grid;
+    gap: var(--space-sm);
+    max-inline-size: var(--measure);
+    margin-block-end: var(--space-2xl);
+  }
+  .work__line {
+    color: var(--text-2);
+    font-size: var(--fs-lede);
+    line-height: var(--lh-lede);
+  }
+
+  .work__grid {
+    display: grid;
+    gap: clamp(3rem, 7vw, 6rem);
+  }
+
+  /* Editorial 12-col card: media + info, alternating sides on wide screens. */
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    align-items: center;
+  }
+  .card__media {
+    position: relative;
+    grid-column: 1 / span 7;
+    aspect-ratio: 5 / 4;
+    overflow: hidden;
+    border: var(--hairline-w) solid var(--hairline);
+    border-radius: 4px;
+    background-color: var(--card);
+    transition: border-color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+  .card__info {
+    grid-column: 9 / span 4;
+    display: grid;
+    gap: var(--space-sm);
+  }
+  /* Alternate: even cards put info first / media on the trailing side. */
+  .card:nth-child(even) .card__media {
+    grid-column: 6 / span 7;
+    order: 2;
+  }
+  .card:nth-child(even) .card__info {
+    grid-column: 1 / span 4;
+    order: 1;
+  }
+
+  .card__placeholder {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+    transform: scale(1); /* motion reveals 1.04 -> 1.0 */
+    will-change: transform;
+  }
+  .card__dots {
+    color: var(--ink);
+    opacity: 0.12;
+  }
+  [data-theme="dark"] .card__dots {
+    color: var(--paper);
+    opacity: 0.12;
+  }
+  .card__ghost {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 180px;
+    fill: var(--ink);
+    opacity: 0.05;
+    letter-spacing: 0.04em;
+  }
+  [data-theme="dark"] .card__ghost {
+    fill: var(--paper);
+    opacity: 0.06;
+  }
+  .card__stroke {
+    fill: var(--accent);
+  }
+
+  .card__chip {
+    position: absolute;
+    inset-block-start: 0.85rem;
+    inset-inline-start: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--card);
+    border: var(--hairline-w) solid var(--hairline);
+    border-radius: 2px;
+    font-size: var(--fs-mono-sm);
+    color: var(--text);
+    direction: ltr; /* client names stay Latin */
+    unicode-bidi: isolate;
+  }
+  .card__title {
+    position: absolute;
+    inset-block-end: -0.12em;
+    inset-inline-start: 0.6rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 0.95;
+    color: var(--ink);
+    direction: ltr;
+    unicode-bidi: isolate;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .card__title {
+    color: var(--paper);
+  }
+
+  .card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-3);
+    font-size: var(--fs-mono-sm);
+  }
+  html[lang="ar"] .card__meta {
+    /* sector is Arabic; keep the row readable but client/year stay Latin */
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: normal;
+    direction: rtl;
+  }
+  .card__meta > span:not(.card__dot) {
+    color: var(--text-2);
+  }
+  .card__year,
+  html[lang="ar"] .card__meta span:first-child {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .card__body {
+    color: var(--text);
+    max-inline-size: 40ch;
+  }
+
+  .card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+    font-size: var(--fs-mono);
+    min-block-size: var(--tap);
+  }
+  html[lang="ar"] .card__cta {
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  /* Stretched link: covers the whole card, makes it one large target. */
+  .card__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    color: inherit;
+  }
+  .card__link:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 4px;
+  }
+  .card__arrow {
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  /* Hover: lift 2px, hairline turns green, arrow nudges toward reading end. */
+  .card:hover .card__media {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .card:hover .card__arrow {
+    transform: translateX(0.35em);
+  }
+  html[dir="rtl"] .card:hover .card__arrow {
+    transform: translateX(-0.35em);
+  }
+
+  @media (max-width: 60rem) {
+    .card,
+    .card:nth-child(even) {
+      grid-template-columns: 1fr;
+    }
+    .card__media,
+    .card:nth-child(even) .card__media {
+      grid-column: 1 / -1;
+      order: 0;
+    }
+    .card__info,
+    .card:nth-child(even) .card__info {
+      grid-column: 1 / -1;
+      order: 0;
+    }
+  }
+</style>

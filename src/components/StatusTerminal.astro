@@ -1,0 +1,165 @@
+---
+import { locales, type Locale } from "../i18n";
+// Build-time import of the COMMITTED metrics file. Values are server-rendered
+// (so no-JS / SEO sees them too) and stay "—" until honestly measured.
+import metrics from "../../public/metrics.json";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const t = content.terminal;
+
+const raw: Record<string, number | null> = {
+  performance: metrics.performance,
+  accessibility: metrics.accessibility,
+  lcp: metrics.lcp,
+};
+
+const rows = t.rows.map((row) => {
+  const value = raw[row.key];
+  const measured = value !== null && value !== undefined;
+  const pass =
+    measured && (row.compare === "gte" ? value! >= row.target : value! <= row.target);
+  const display = !measured
+    ? "—"
+    : row.unit === "ms"
+      ? `${value} ${row.unit}`
+      : `${value}`;
+  return { ...row, value, measured, pass, display };
+});
+---
+
+<aside
+  class="terminal glass"
+  data-terminal
+  aria-label={t.title}
+>
+  <header class="terminal__bar">
+    <span class="terminal__lights" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </span>
+    <span class="terminal__title mono">{t.title}</span>
+  </header>
+
+  {/* Typed phase is decorative for SR; the live region below announces once. */}
+  <div class="terminal__body" aria-hidden="true">
+    <p class="terminal__cmd mono"><span class="terminal__prompt">$</span> <span data-type-cmd>{t.cmd}</span></p>
+
+    <ul class="terminal__rows" data-rows>
+      {rows.map((row) => (
+        <li class="terminal__row" data-key={row.key} data-pass={String(row.pass)} data-measured={String(row.measured)}>
+          <span class="terminal__label mono">{row.label}</span>
+          <span class="terminal__lead" aria-hidden="true"></span>
+          <span class="terminal__value mono" data-value data-display={row.display}>{row.display}</span>
+          <span class="terminal__dot" data-pass-dot aria-hidden="true"></span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="terminal__note caption">{t.metricsNote}</p>
+  </div>
+
+  {/* Announced once, politely, when typing settles (or immediately under RM). */}
+  <p class="visually-hidden" aria-live="polite" data-terminal-live></p>
+  <p class="visually-hidden" data-not-measured>{t.notMeasured}</p>
+</aside>
+
+<style>
+  .terminal {
+    inline-size: min(28rem, 100%);
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--font-mono);
+  }
+  .terminal__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding-block: 0.5rem;
+    padding-inline: 0.85rem;
+    border-block-end: var(--glass-border);
+  }
+  .terminal__lights {
+    display: inline-flex;
+    gap: 5px;
+  }
+  .terminal__lights span {
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .terminal__title {
+    /* Text on glass is ALWAYS full ink/paper. */
+    color: var(--text);
+    font-size: var(--fs-mono-sm);
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .terminal__body {
+    padding-block: 0.85rem 1rem;
+    padding-inline: 0.95rem;
+    direction: ltr; /* terminal output is Latin/mono in both trees */
+    text-align: start;
+  }
+  .terminal__cmd {
+    color: var(--text);
+    font-size: var(--fs-mono-sm);
+    margin-block-end: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .terminal__prompt {
+    color: var(--accent);
+  }
+  .terminal__rows {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .terminal__row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+    font-size: var(--fs-mono-sm);
+  }
+  .terminal__lead {
+    border-block-end: 1px dotted color-mix(in srgb, currentColor 30%, transparent);
+    transform: translateY(-2px);
+  }
+  .terminal__value {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Green pass-dot: non-text use of green on glass (allowed). Hidden until pass;
+     JS springs it in. Static fallback simply shows it when data-pass is true. */
+  .terminal__dot {
+    inline-size: 9px;
+    block-size: 9px;
+    border-radius: 999px;
+    background-color: var(--accent);
+    transform: scale(0);
+    opacity: 0;
+  }
+  .terminal__row[data-pass="true"] .terminal__dot {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .terminal__note {
+    margin-block-start: 0.85rem;
+    color: var(--text-3);
+    font-size: var(--fs-mono-sm);
+    direction: ltr;
+    text-align: start;
+  }
+  html[lang="ar"] .terminal__note {
+    /* The note is the one localized string here; let it read in the AR voice. */
+    font-family: var(--font-body);
+    direction: rtl;
+    text-align: start;
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+// Visibility is decided PRE-PAINT by the inline script in BaseLayout, which sets
+// html[data-preload="show"|"skip"]. This element is display:none unless "show"
+// (first visit + motion allowed), so reduced-motion / repeat visits never see it.
+---
+
+<div class="preloader" data-preloader role="presentation">
+  <div class="preloader__inner">
+    <span class="preloader__counter mono" data-preloader-counter>000</span>
+    <span class="preloader__stroke" aria-hidden="true">
+      <span class="preloader__stroke-fill" data-preloader-stroke></span>
+    </span>
+  </div>
+</div>
+
+<style>
+  .preloader {
+    display: none;
+  }
+  html[data-preload="show"] .preloader {
+    display: grid;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-preloader);
+    place-content: center;
+    background-color: var(--bg);
+    /* Hard cap / bail: even if JS never runs, wipe up by 1.2s. */
+    animation: preloader-bail 1.2s var(--ease) forwards;
+  }
+
+  .preloader__inner {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: center;
+  }
+  .preloader__counter {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    letter-spacing: 0.08em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .preloader__stroke {
+    display: block;
+    inline-size: clamp(8rem, 24vw, 14rem);
+    block-size: var(--stroke-h);
+    background-color: var(--hairline);
+    overflow: hidden;
+  }
+  .preloader__stroke-fill {
+    display: block;
+    block-size: 100%;
+    inline-size: 100%;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: inline-start;
+  }
+
+  /* JS-complete wipe (earlier than the bail when assets settle in time). */
+  html[data-preload="show"] .preloader.is-done {
+    animation: none;
+    transform: translateY(-100%);
+    transition: transform 0.55s var(--ease);
+  }
+
+  @keyframes preloader-bail {
+    0%,
+    78% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
+</style>

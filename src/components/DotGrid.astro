@@ -1,0 +1,47 @@
+---
+// Static SVG dot-grid on the brand grid (~8px). Renders first, beneath the
+// WebGL canvas, so there is ZERO layout shift and a faithful fallback under
+// reduced-motion / WebGL-fail / low-memory / software-GL. currentColor is
+// retinted from the CSS tokens per theme.
+interface Props {
+  /** Unique pattern id (avoid <defs> collisions across instances). */
+  id: string;
+  /** Grid pitch in px. */
+  gap?: number;
+  /** Dot radius in px. */
+  radius?: number;
+  class?: string;
+}
+const { id, gap = 8, radius = 0.9, class: cls = "" } = Astro.props;
+---
+
+<svg
+  class={`dotgrid ${cls}`}
+  aria-hidden="true"
+  preserveAspectRatio="xMidYMid slice"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <pattern id={id} width={gap} height={gap} patternUnits="userSpaceOnUse">
+      <circle cx={radius} cy={radius} r={radius} fill="currentColor"></circle>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill={`url(#${id})`}></rect>
+</svg>
+
+<style>
+  .dotgrid {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    /* ink points on paper (light) / paper points on surface (dark) */
+    color: var(--ink);
+    opacity: 0.16;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .dotgrid {
+    color: var(--paper);
+    opacity: 0.14;
+  }
+</style>

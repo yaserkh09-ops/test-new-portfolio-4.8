@@ -13,14 +13,7 @@ export default defineConfig({
   // natively-written copy, so Astro's i18n router stays out of the way.
   trailingSlash: "always",
   build: {
-    inlineStylesheets: "never",
+    inlineStylesheets: "auto",
     assets: "_astro",
-  },
-  vite: {
-    build: {
-      // Keep the WebGL/motion islands as their own chunks so we can report
-      // and reason about per-island bundle sizes.
-      cssMinify: "lightningcss",
-    },
   },
 });

@@ -1,0 +1,174 @@
+---
+import DotGrid from "./DotGrid.astro";
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const loc = locales[locale];
+const { content } = loc;
+const other = locales[loc.other.code];
+
+// The bilingual credit is the one place both marks appear together. Split so the
+// Latin half renders in Plex Mono and the Arabic half in Plex Sans Arabic.
+const [creditLatin, creditArabic] = content.footer.credit.split(" · ");
+---
+
+<footer class="footer" data-footer>
+  {/* Upper-footer Stroke band: dense horizontal dot field. Static SVG fallback
+      paints first; the OGL island fades in once warm (paused until in view). */}
+  <div class="footer__band" aria-hidden="true">
+    <DotGrid id="footer-band" gap={7} radius={0.85} class="footer__dots" />
+    <canvas class="footer__canvas" data-footer-canvas></canvas>
+  </div>
+
+  <div class="shell footer__inner">
+    <p class="footer__credit">
+      <span class="footer__credit-latin">{creditLatin}</span>
+      <span class="footer__credit-sep" aria-hidden="true">·</span>
+      <span class="footer__credit-ar" lang="ar" dir="rtl">{creditArabic}</span>
+    </p>
+
+    <div class="footer__meta">
+      <p class="footer__a11y">{content.footer.a11yNote}</p>
+
+      <div class="footer__controls">
+        <a
+          class="footer__locale sweep tap"
+          href={other.path}
+          hreflang={other.htmlLang}
+          lang={other.htmlLang}
+          dir={other.dir}
+        >
+          {content.nav.localeSwitch}
+        </a>
+        <button
+          class="footer__theme"
+          type="button"
+          data-theme-toggle
+          aria-label="Toggle colour theme"
+          aria-pressed="false"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="M12 4 a8 8 0 0 1 0 16 z" fill="currentColor" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="footer__rights">{content.footer.rights}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    border-block-start: var(--hairline-w) solid var(--hairline);
+    padding-block-end: var(--space-xl);
+  }
+  .footer__band {
+    position: relative;
+    block-size: clamp(7rem, 16vh, 11rem);
+    overflow: hidden;
+    border-block-end: var(--hairline-w) solid var(--hairline);
+  }
+  .footer__dots {
+    opacity: 0.2;
+  }
+  .footer__canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+  .footer__canvas[data-warm="true"] {
+    opacity: 1;
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block-start: var(--space-xl);
+  }
+
+  .footer__credit {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 12px;
+    color: var(--text);
+    flex-wrap: wrap;
+  }
+  .footer__credit-latin {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .footer__credit-sep {
+    color: var(--accent);
+  }
+  .footer__credit-ar {
+    font-family: "IBM Plex Sans Arabic", "IBM Plex Sans Arabic Fallback",
+      system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    direction: rtl;
+    unicode-bidi: isolate;
+  }
+
+  .footer__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: var(--space-md);
+    border-block: var(--hairline-w) solid var(--hairline);
+  }
+  .footer__a11y {
+    color: var(--text-2);
+    font-size: var(--fs-body);
+    max-inline-size: 40ch;
+  }
+  .footer__controls {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .footer__locale {
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+  .footer__theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tap);
+    block-size: var(--tap);
+    color: var(--text);
+    border-radius: 999px;
+  }
+  .footer__theme:hover {
+    color: var(--accent);
+  }
+  [data-theme="dark"] .footer__theme svg {
+    transform: rotate(180deg);
+  }
+
+  .footer__rights {
+    color: var(--text-3);
+    font-size: var(--fs-mono-sm);
+  }
+  html[lang="ar"] .footer__rights {
+    font-family: var(--font-body);
+  }
+</style>

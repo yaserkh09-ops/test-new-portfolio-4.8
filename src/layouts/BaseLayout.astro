@@ -1,0 +1,191 @@
+---
+import { locales, type Locale } from "../i18n";
+import Preloader from "../components/Preloader.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/fonts.css";
+import "../styles/tokens.css";
+import "../styles/global.css";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const loc = locales[locale];
+const { content, dir, htmlLang } = loc;
+
+// Canonical origin is derived from the deploy env (astro.config -> process.env.URL),
+// with a placeholder fallback for local builds.
+const origin = Astro.site?.origin ?? "https://yasir.studio";
+const canonical = new URL(loc.path, origin).href;
+const hrefEn = new URL("/en/", origin).href;
+const hrefAr = new URL("/ar/", origin).href;
+
+// Above-the-fold faces to preload, per locale (only what the hero paints first).
+const preloadFonts =
+  locale === "ar"
+    ? ["/fonts/plex-arabic-700.woff2", "/fonts/plex-arabic-400.woff2", "/fonts/plex-mono-latin-500.woff2"]
+    : ["/fonts/plex-sans-latin-600.woff2", "/fonts/plex-sans-latin-400.woff2", "/fonts/plex-mono-latin-500.woff2"];
+---
+
+<!doctype html>
+<html lang={htmlLang} dir={dir} data-theme="light" data-preload="skip">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/* Resolve theme + preloader BEFORE first paint (no FOUC, no flash). */}
+    <script is:inline>
+      (function () {
+        var de = document.documentElement;
+        try {
+          var stored = localStorage.getItem("theme");
+          var theme =
+            stored ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          de.dataset.theme = theme;
+        } catch (e) {
+          de.dataset.theme = "light";
+        }
+        try {
+          var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          var seen = sessionStorage.getItem("yasir:seen");
+          de.dataset.preload = !reduce && !seen ? "show" : "skip";
+        } catch (e) {
+          de.dataset.preload = "skip";
+        }
+      })();
+    </script>
+
+    <title>{content.meta.title}</title>
+    <meta name="description" content={content.meta.description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F8F6F1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)" />
+
+    {/* Canonical + hreflang (en / ar / x-default) */}
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={hrefEn} />
+    <link rel="alternate" hreflang="ar" href={hrefAr} />
+    <link rel="alternate" hreflang="x-default" href={hrefEn} />
+
+    {/* Open Graph / social */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={content.meta.title} />
+    <meta property="og:description" content={content.meta.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === "ar" ? "ar_SA" : "en_US"} />
+    <meta property="og:locale:alternate" content={locale === "ar" ? "en_US" : "ar_SA"} />
+    <meta property="og:site_name" content="YASIR_" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={content.meta.title} />
+    <meta name="twitter:description" content={content.meta.description} />
+
+    {/* Preload above-the-fold faces (per locale) — crossorigin required for fonts */}
+    {preloadFonts.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+
+    {/* Cross-document View Transitions for locale switches (and any navigation). */}
+    <style is:inline>
+      @view-transition {
+        navigation: auto;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        @view-transition {
+          navigation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    {/* Scroll progress — a 2px green Stroke that scaleX-es with scroll. */}
+    <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress__bar"></span></div>
+
+    {/* Custom cursor layer (pointer:fine + motion only; populated by JS). */}
+    <div class="cursor" aria-hidden="true" hidden>
+      <span class="cursor__dot"></span>
+      <span class="cursor__ring"></span>
+    </div>
+
+    <Preloader />
+    <Nav locale={locale} />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer locale={locale} />
+  </body>
+</html>
+
+<style>
+  /* Scroll progress Stroke — fixed at block-start, fills with scroll. */
+  .scroll-progress {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--stroke-h);
+    z-index: var(--z-progress);
+    pointer-events: none;
+  }
+  .scroll-progress__bar {
+    display: block;
+    block-size: 100%;
+    inline-size: 100%;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: inline-start;
+    will-change: transform;
+  }
+  /* No-JS / pre-hydration: keep the bar invisible rather than full. */
+
+  /* Custom cursor — never shown for touch/keyboard; JS unhides on pointer:fine. */
+  .cursor {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: var(--z-cursor);
+    pointer-events: none;
+    inline-size: 0;
+    block-size: 0;
+  }
+  .cursor__dot,
+  .cursor__ring {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    border-radius: 999px;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .cursor__dot {
+    inline-size: 6px;
+    block-size: 6px;
+    margin-block-start: -3px;
+    margin-inline-start: -3px;
+    background-color: var(--ink);
+  }
+  [data-theme="dark"] .cursor__dot {
+    background-color: var(--paper);
+  }
+  .cursor__ring {
+    inline-size: 28px;
+    block-size: 28px;
+    margin-block-start: -14px;
+    margin-inline-start: -14px;
+    border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+    color: var(--text);
+    transition: width var(--dur-fast) var(--ease),
+      height var(--dur-fast) var(--ease),
+      border-radius var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease);
+  }
+
+  main {
+    display: block;
+  }
+</style>

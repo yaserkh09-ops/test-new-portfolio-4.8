@@ -1,0 +1,100 @@
+---
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const p = content.proof;
+---
+
+<section class="proof" aria-labelledby="proof-line" data-proof>
+  <div class="shell proof__inner">
+    <p class="proof__line" id="proof-line">{p.line}</p>
+
+    <dl class="proof__metrics">
+      {p.metrics.map((m) => {
+        const numStr = m.num.toFixed(m.decimals);
+        return (
+          <div class="proof__metric" data-metric>
+            <dt class="proof__value mono">
+              {/* Final value is server-rendered (no-JS / SEO); JS counts up to it. */}
+              <span data-count-num data-num={m.num} data-decimals={m.decimals}>{numStr}</span><span class="proof__suffix">{m.suffix}</span>
+            </dt>
+            <dd class="proof__label">{m.label}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  </div>
+</section>
+
+<style>
+  /* Full-width band in the INVERSE of the current mode. Green follows the band's
+     effective mode so contrast holds (greens stay mode-locked to their bg). */
+  .proof {
+    --proof-accent: #3fbf7f;
+    --proof-text-2: #a8a29a;
+    background-color: #161513;
+    color: #f8f6f1;
+    padding-block: var(--space-3xl);
+  }
+  [data-theme="dark"] .proof {
+    --proof-accent: #0b7a40;
+    --proof-text-2: #57534e;
+    background-color: #f8f6f1;
+    color: #111111;
+  }
+
+  .proof__inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+  .proof__line {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--fs-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: var(--tracking-h2);
+    max-inline-size: 24ch;
+  }
+  html[lang="ar"] .proof__line {
+    font-weight: 700;
+  }
+
+  .proof__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    margin: 0;
+  }
+  .proof__metric {
+    display: grid;
+    gap: var(--space-sm);
+    padding-block-start: var(--space-md);
+    border-block-start: 2px solid var(--proof-accent);
+  }
+  .proof__value {
+    color: var(--proof-accent);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 500;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    direction: ltr; /* numbers stay Latin/Western in both trees */
+    unicode-bidi: isolate;
+  }
+  .proof__label {
+    margin: 0;
+    color: var(--proof-text-2);
+    font-size: var(--fs-body);
+    max-inline-size: 28ch;
+  }
+
+  @media (max-width: 48rem) {
+    .proof__metrics {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+  }
+</style>

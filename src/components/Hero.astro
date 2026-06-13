@@ -1,0 +1,144 @@
+---
+import DotGrid from "./DotGrid.astro";
+import StatusTerminal from "./StatusTerminal.astro";
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const h = content.hero;
+---
+
+<section class="hero" id="top" data-hero>
+  <div class="hero__bg" aria-hidden="true">
+    {/* Static dot-grid paints first (zero CLS); the WebGL canvas fades in only
+        once warm, and this stays for reduced-motion / WebGL-fail. */}
+    <DotGrid id="hero-grid" gap={8} />
+    <canvas class="hero__canvas" data-hero-canvas></canvas>
+  </div>
+
+  <div class="hero__content shell">
+    <p class="hero__eyebrow eyebrow">{h.eyebrow}</p>
+
+    <h1 class="hero__title" data-hero-title>
+      {h.h1Lines.map((line) => (
+        <span class="hero__line"><span class="hero__line-inner" data-line>{line}</span></span>
+      ))}
+    </h1>
+
+    <p class="hero__sub" data-hero-sub>{h.sub}</p>
+
+    <div class="hero__cta glass">
+      <a class="btn btn--primary sweep" href="#contact" data-magnetic>{h.cta}</a>
+      <span class="hero__cta-note caption">{h.ctaNote}</span>
+    </div>
+  </div>
+
+  <div class="hero__terminal">
+    <StatusTerminal locale={locale} />
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-block-size: 100svh;
+    display: grid;
+    align-content: center;
+    overflow: clip;
+    padding-block: clamp(7rem, 14vh, 11rem) clamp(4rem, 10vh, 8rem);
+    isolation: isolate;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .hero__canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0; /* fades in only once the GL field is warm */
+    transition: opacity 0.6s var(--ease);
+  }
+  .hero__canvas[data-warm="true"] {
+    opacity: 1;
+  }
+
+  .hero__content {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    gap: clamp(1.25rem, 3vh, 2rem);
+    max-inline-size: 54rem;
+  }
+
+  .hero__eyebrow {
+    color: var(--accent);
+  }
+
+  .hero__title {
+    /* lines clip-reveal; default state is fully visible for no-JS / RM */
+    margin-block: 0.25rem;
+  }
+  .hero__line {
+    display: block;
+    overflow: hidden;
+    padding-block-end: 0.04em; /* room for descenders inside the clip */
+  }
+  .hero__line-inner {
+    display: block;
+    will-change: transform;
+  }
+
+  .hero__sub {
+    max-inline-size: var(--measure);
+    color: var(--text-2);
+    font-size: var(--fs-lede);
+    line-height: var(--lh-lede);
+  }
+  html[lang="ar"] .hero__sub {
+    max-inline-size: 60ch;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 0.6rem 0.7rem 0.6rem 0.7rem;
+    border-radius: 999px;
+  }
+  .hero__cta-note {
+    color: var(--text);
+    padding-inline-end: 0.5rem;
+  }
+
+  .hero__terminal {
+    position: absolute;
+    inset-block-end: clamp(1.25rem, 4vh, 2.5rem);
+    inset-inline-end: var(--gutter);
+    z-index: 2;
+    inline-size: min(28rem, calc(100% - var(--gutter) * 2));
+  }
+
+  /* Stack the terminal under the content on small screens. */
+  @media (max-width: 60rem) {
+    .hero {
+      align-content: start;
+    }
+    .hero__terminal {
+      position: static;
+      margin-block-start: clamp(2rem, 6vh, 3rem);
+      margin-inline: auto;
+      inline-size: min(28rem, 100%);
+      padding-inline: var(--gutter);
+    }
+    .hero__content {
+      padding-block-end: 0;
+    }
+  }
+</style>

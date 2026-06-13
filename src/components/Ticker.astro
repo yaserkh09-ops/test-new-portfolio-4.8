@@ -1,0 +1,117 @@
+---
+import { locales, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const { content } = locales[locale];
+const claims = content.ticker;
+---
+
+<section class="ticker" aria-label={content.nav.work} data-ticker-section>
+  {/* Two identical runs make a seamless CSS marquee; the clone is hidden from
+      SR and collapsed under reduced motion (claims then wrap statically). */}
+  <div class="ticker__track" data-ticker tabindex="0" aria-label="Capabilities">
+    <ul class="ticker__run">
+      {claims.map((claim) => (
+        <li class="ticker__item">
+          <span class="ticker__text">{claim}</span>
+          <span class="stroke ticker__sep" aria-hidden="true"></span>
+        </li>
+      ))}
+    </ul>
+    <ul class="ticker__run ticker__run--clone" aria-hidden="true">
+      {claims.map((claim) => (
+        <li class="ticker__item">
+          <span class="ticker__text">{claim}</span>
+          <span class="stroke ticker__sep" aria-hidden="true"></span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ticker {
+    --marquee-dur: 38s;
+    border-block: var(--hairline-w) solid var(--hairline);
+    padding-block: clamp(0.9rem, 2vw, 1.25rem);
+    overflow: hidden;
+  }
+  .ticker__track {
+    display: flex;
+    inline-size: max-content;
+    animation: ticker-flow var(--marquee-dur) linear infinite;
+  }
+  .ticker__track:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: -4px;
+  }
+  /* Reversed flow in RTL (reading direction reverses). */
+  html[dir="rtl"] .ticker__track {
+    animation-direction: reverse;
+  }
+  .ticker:hover .ticker__track,
+  .ticker__track:focus-within,
+  .ticker__track:focus {
+    animation-play-state: paused;
+  }
+
+  .ticker__run {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .ticker__item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    padding-inline-end: clamp(1.25rem, 3vw, 2.5rem);
+  }
+  .ticker__text {
+    /* EN: Plex Mono uppercase +6%. AR: native body, no uppercase/tracking. */
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--fs-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  html[lang="ar"] .ticker__text {
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .ticker__sep {
+    inline-size: 1.75rem;
+  }
+
+  @keyframes ticker-flow {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Reduced motion: no marquee — a single static, wrapped, centred list. */
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track {
+      animation: none;
+      inline-size: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem 0;
+    }
+    .ticker__run--clone {
+      display: none;
+    }
+    .ticker__run {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/Hero.astro";
+import Ticker from "../../components/Ticker.astro";
+import Work from "../../components/Work.astro";
+import System from "../../components/System.astro";
+import Proof from "../../components/Proof.astro";
+import Contact from "../../components/Contact.astro";
+
+const locale = "ar";
+---
+
+<BaseLayout locale={locale}>
+  <Hero locale={locale} />
+  <Ticker locale={locale} />
+  <Work locale={locale} />
+  <System locale={locale} />
+  <Proof locale={locale} />
+  <Contact locale={locale} />
+</BaseLayout>

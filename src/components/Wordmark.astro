@@ -1,0 +1,55 @@
+---
+import { wordmark, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  /** Visual scale: "nav" (default inline) or "giant" (oversized footer/CTA). */
+  size?: "nav" | "giant";
+  class?: string;
+}
+const { locale, size = "nav", class: cls = "" } = Astro.props;
+const mark = wordmark[locale];
+// Splitting glyphs would break Arabic shaping (each span is its own run), so the
+// mark is always rendered whole. The "Stroke draws in" effect on the giant
+// footer/CTA mark is an overlaid green baseline Stroke (handled by the parent),
+// which is faithful to the motif: the _ and the kashida ARE a baseline stroke.
+---
+
+<span class={`wordmark wordmark--${locale} wordmark--${size} ${cls}`} lang={locale}>{mark}</span>
+
+<style>
+  .wordmark {
+    color: var(--wordmark);
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* EN: Plex Mono Medium, +16% tracking — the _ is part of the mark. */
+  .wordmark--en {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wordmark);
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  /* AR: Plex Sans Arabic Bold, ~8% larger optically, never letter-spaced. */
+  .wordmark--ar {
+    font-family: "IBM Plex Sans Arabic", "IBM Plex Sans Arabic Fallback",
+      system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: normal;
+    font-size: 1.08em;
+    direction: rtl;
+  }
+
+  .wordmark--nav {
+    font-size: 1.0625rem;
+  }
+
+  .wordmark--giant {
+    font-size: clamp(4rem, 8vw + 1rem, 11rem);
+    line-height: 0.9;
+  }
+</style>
