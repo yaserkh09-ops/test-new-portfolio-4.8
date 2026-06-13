@@ -9,10 +9,11 @@ const { content } = locales[locale];
 const claims = content.ticker;
 ---
 
-<section class="ticker" aria-label={content.nav.work} data-ticker-section>
+<section class="ticker" data-ticker-section>
   {/* Two identical runs make a seamless CSS marquee; the clone is hidden from
-      SR and collapsed under reduced motion (claims then wrap statically). */}
-  <div class="ticker__track" data-ticker tabindex="0" aria-label="Capabilities">
+      SR and collapsed under reduced motion (claims then wrap statically). The
+      track is focusable so keyboard users can pause it (focus -> paused). */}
+  <div class="ticker__track" data-ticker tabindex="0">
     <ul class="ticker__run">
       {claims.map((claim) => (
         <li class="ticker__item">

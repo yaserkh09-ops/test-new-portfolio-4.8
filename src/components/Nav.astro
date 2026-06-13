@@ -9,6 +9,7 @@ const { locale } = Astro.props;
 const loc = locales[locale];
 const { content } = loc;
 const other = locales[loc.other.code];
+const navLabel = locale === "ar" ? "التنقل الرئيسي" : "Primary";
 ---
 
 <header class="nav" data-nav>
@@ -17,7 +18,7 @@ const other = locales[loc.other.code];
       <Wordmark locale={locale} size="nav" />
     </a>
 
-    <nav class="nav__links" aria-label={content.nav.contact}>
+    <nav class="nav__links" aria-label={navLabel}>
       <a class="nav__link sweep" href="#work">{content.nav.work}</a>
       <a class="nav__link sweep" href="#process">{content.nav.process}</a>
       <a class="nav__link sweep" href="#contact">{content.nav.contact}</a>
