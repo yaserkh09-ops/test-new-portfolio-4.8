@@ -1,0 +1,152 @@
+/* =============================================================================
+   DESIGN TOKENS — the engineered system.
+   Rules encoded here:
+   - One green per mode, mode-locked (never crosses light/dark).
+   - One easing everywhere.
+   - Stone tones are NON-TEXT-on-glass only; text on glass is always ink/paper.
+   - Logical properties only downstream (margin-inline, inset-block, ...).
+   - No gradients/shadows/textures/ornament.
+   ========================================================================== */
+
+:root {
+  /* --- One easing, everywhere --------------------------------------- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.24s;
+  --dur: 0.5s;
+  --dur-slow: 0.9s;
+
+  /* --- LIGHT palette (raw) ------------------------------------------ */
+  --paper: #f8f6f1; /* bg            */
+  --ink: #111111; /* text          */
+  --stone-700: #57534e; /* text-2        */
+  --stone-500: #6c655f; /* text-3 / caption */
+  --stone-300: #d8d4cc; /* hairlines — NON-TEXT only */
+  --signal-green: #0b7a40; /* accent / pass — used sparingly */
+  --error: #b42318;
+  --white: #ffffff; /* cards         */
+
+  /* --- Semantic (LIGHT is the default theme) ------------------------ */
+  --bg: var(--paper);
+  --text: var(--ink);
+  --text-2: var(--stone-700);
+  --text-3: var(--stone-500);
+  --hairline: var(--stone-300);
+  --accent: var(--signal-green);
+  --accent-contrast: var(--paper); /* text/dot ON the green button */
+  --danger: var(--error);
+  --card: var(--white);
+  /* The wordmark is ALWAYS ink/paper, never green. */
+  --wordmark: var(--ink);
+
+  /* --- GLASS (the only transparency) -------------------------------- */
+  --glass-bg: color-mix(in srgb, #f8f6f1 78%, transparent);
+  --glass-blur: blur(20px) saturate(160%);
+  --glass-border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+
+  /* --- Type families ------------------------------------------------ */
+  --font-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace,
+    "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --font-body: "IBM Plex Sans", "IBM Plex Sans Fallback", system-ui,
+    -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "IBM Plex Sans", "IBM Plex Sans Fallback", system-ui,
+    -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* --- Type scale — EN logic ---------------------------------------- */
+  /* H1 56/64 fluid up to ~80px >=1280px, tracking -1% */
+  --fs-h1: clamp(3.5rem, 2.9rem + 2.6vw, 5rem);
+  --lh-h1: 1.12;
+  --tracking-h1: -0.01em;
+  /* H2 */
+  --fs-h2: clamp(2rem, 1.5rem + 1.8vw, 3rem);
+  --lh-h2: 1.16;
+  --tracking-h2: -0.01em;
+  /* body 16/26 */
+  --fs-body: 1rem;
+  --lh-body: 1.625;
+  /* lede */
+  --fs-lede: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --lh-lede: 1.5;
+  /* mono labels — LATIN in both trees, uppercase, +6% tracking */
+  --fs-mono: 0.8125rem;
+  --lh-mono: 1.3;
+  --tracking-mono: 0.06em;
+  --fs-mono-sm: 0.6875rem;
+  /* wordmark — EN: Plex Mono Medium, +16% tracking (the _ is part of the mark) */
+  --tracking-wordmark: 0.16em;
+
+  /* --- Spacing scale (logical) -------------------------------------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --space-3xl: clamp(6rem, 4rem + 8vw, 10rem); /* section rhythm */
+
+  /* --- Layout ------------------------------------------------------- */
+  --measure: 68ch; /* prose max */
+  --shell: 88rem; /* page max-width */
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  --hairline-w: 1px;
+
+  /* --- Hit targets / focus ------------------------------------------ */
+  --tap: 44px; /* minimum interactive target */
+  --focus-ring: 2px solid var(--accent);
+  --focus-offset: 2px;
+
+  /* --- Stroke motif ------------------------------------------------- */
+  --stroke-h: 2px; /* baseline stroke thickness */
+  --z-cursor: 9999;
+  --z-progress: 9000;
+  --z-nav: 800;
+  --z-preloader: 9500;
+}
+
+/* --- DARK palette --------------------------------------------------- */
+[data-theme="dark"] {
+  --surface: #161513; /* bg     */
+  --panel: #211f1b; /* cards  */
+  --stone-400: #a8a29a; /* text-2 */
+  --signal-green-d: #3fbf7f; /* accent */
+  --error-d: #f08c7d;
+
+  --bg: var(--surface);
+  --text: var(--paper); /* paper #F8F6F1 as text */
+  --text-2: var(--stone-400);
+  --text-3: var(--stone-400);
+  /* Derived dark hairline (NON-TEXT): faint paper on surface. */
+  --hairline: color-mix(in srgb, var(--paper) 14%, transparent);
+  --accent: var(--signal-green-d);
+  --accent-contrast: var(--surface); /* dark text/dot ON the lighter green */
+  --danger: var(--error-d);
+  --card: var(--panel);
+  --wordmark: var(--paper);
+
+  --glass-bg: color-mix(in srgb, #161513 72%, transparent);
+}
+
+/* --- AR locale tree: native Arabic type logic (not converted) -------- */
+html[lang="ar"] {
+  --font-body: "IBM Plex Sans Arabic", "IBM Plex Sans Arabic Fallback",
+    system-ui, "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-display: "IBM Plex Sans Arabic", "IBM Plex Sans Arabic Fallback",
+    system-ui, "Segoe UI", Tahoma, Arial, sans-serif;
+
+  /* AR H1 50/68 fluid to ~72px; never below 1.7 leading on body */
+  --fs-h1: clamp(3.125rem, 2.6rem + 2.3vw, 4.5rem);
+  --lh-h1: 1.36;
+  --tracking-h1: 0; /* Arabic is never letter-spaced */
+  --fs-h2: clamp(1.875rem, 1.4rem + 1.7vw, 2.75rem);
+  --lh-h2: 1.4;
+  --tracking-h2: 0;
+  /* body 17/30 */
+  --fs-body: 1.0625rem;
+  --lh-body: 1.765;
+  --fs-lede: clamp(1.1875rem, 1.05rem + 0.5vw, 1.4375rem);
+  --lh-lede: 1.7;
+}
+
+/* Honour an explicit theme even before hydration via the inline pre-paint
+   script; the [data-theme] attribute is the single source of truth. */

@@ -1,0 +1,8 @@
+{
+  "_README": "Live Lighthouse metrics surfaced by the hero status terminal. NEVER hand-edit these to fake values — the studio's whole pitch is that numbers are measured, not claimed. Wire this from Lighthouse CI (see TODO below). null renders as '—' (not yet measured); the green pass-dot only springs in when a real value meets its target (perf>=95, a11y=100, lcp<=2500ms).",
+  "_TODO": "Add a Lighthouse CI step (e.g. `@lhci/cli autorun` against the deployed URL or `npm run preview`) that writes performance (0-100), accessibility (0-100) and lcp (ms) into this file on each release, then commit it.",
+  "_measuredAt": null,
+  "performance": null,
+  "accessibility": null,
+  "lcp": null
+}
